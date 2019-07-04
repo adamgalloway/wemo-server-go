@@ -85,6 +85,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
         bodyString := string(body)
 
         if strings.Contains(bodyString, "GetBinaryState") {
+            // TODO return state
             return
         } else if strings.Contains(bodyString, "<BinaryState>1</BinaryState>") {
             state = "1"
@@ -105,7 +106,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
 	if err != nil {
             log.Fatal(err)
 	}
-	fmt.Printf("execution result: %q\n", out.String())
+	fmt.Println("execution result: ", out.String())
 
         res := upnpResponse(state)
         w.Header().Set("Content-Type", "text/xml")
@@ -151,11 +152,19 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, res)
 }
 
-func HandleHttp(port int, name string, id string, serial string, oncommand string, offcommand string) {
+func handleHttp(name string, device Device) {
+    fmt.Println("Starting server on ", device.Port)
     server := http.NewServeMux()
-    server.HandleFunc("/setup.xml", setupHandler(name, id, serial))
-    server.HandleFunc("/upnp/control/basicevent1", upnpHandler(oncommand, offcommand))
+    server.HandleFunc("/setup.xml", setupHandler(name, device.Id, device.Serial))
+    server.HandleFunc("/upnp/control/basicevent1", upnpHandler(device.OnCommand, device.OffCommand))
     server.HandleFunc("/eventservice.xml", eventHandler)
-    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(port), server))
+    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(device.Port), server))
 }
 
+func HandleHttp(devices map[string]Device) {
+
+    for key, device := range devices {
+        go handleHttp(key, device)
+    }
+
+}

@@ -3,12 +3,20 @@ package main
 import (
     "fmt"
     "net"
-    "os"
     "strings"
     "strconv"
 )
 
-func SearchResponse(host string, port int, id string) string {
+func lookupHost() string {
+    conn,err := net.Dial("udp", "8.8.8.8:80")
+    CheckError(err)
+    defer conn.Close()
+    localAddr := conn.LocalAddr().String()
+    i := strings.LastIndex(localAddr, ":")
+    return localAddr[0:i]
+}
+
+func searchResponse(host string, port int, id string) string {
     var res strings.Builder
     res.WriteString("HTTP/1.1 200 OK\r\n")
     res.WriteString("CACHE-CONTROL: max-age=86400\r\n")
@@ -30,48 +38,43 @@ func SearchResponse(host string, port int, id string) string {
     return res.String()
 }
  
-/* A Simple function to verify error */
-func CheckError(err error) {
-    if err  != nil {
-        fmt.Println("Error: " , err)
-        os.Exit(0)
-    }
-}
- 
-func HandleUpnp(host string, devices map[string]Device) {
-    /* Lets prepare a address at any address at port 1900*/   
-    ServerAddr,err := net.ResolveUDPAddr("udp","239.255.255.250:1900")
+func HandleUpnp(devices map[string]Device) {
+    serverAddr,err := net.ResolveUDPAddr("udp","239.255.255.250:1900")
     CheckError(err)
  
-    /* Now listen at selected port */
-    ServerConn, err := net.ListenMulticastUDP("udp", nil, ServerAddr)
+    serverConn,err := net.ListenMulticastUDP("udp", nil, serverAddr)
     CheckError(err)
-    defer ServerConn.Close()
+    defer serverConn.Close()
  
     buf := make([]byte, 1024)
+
+    host := lookupHost()
+    fmt.Println(host)
  
     for {
-        n,addr,err := ServerConn.ReadFromUDP(buf)
-        req := string(buf[0:n])
-
-        //fmt.Println("Received ",req," from ",addr)
- 
-        if strings.Contains(req, "M-SEARCH") && 
-           (strings.Contains(req, "urn:Belkin:device:**") || 
-           strings.Contains(req, "ssdp:all") || 
-           strings.Contains(req, "upnp:rootdevice")) {
-            fmt.Println("Received belkin request")
-
-            // for loop over devices
-            conn, err := net.Dial("udp", addr.String())
-            CheckError(err)
-            fmt.Fprintf(conn, SearchResponse("192.168.1.34", 8080, "aa993f4a-375f-4cf6-98d7-17bfc0f2290d"))
-            conn.Close()
-        }
-
+        n,addr,err := serverConn.ReadFromUDP(buf)
         if err != nil {
             fmt.Println("Error: ",err)
         } 
+
+        req := string(buf[0:n])
+ 
+        if strings.Contains(req, "M-SEARCH") && 
+            (strings.Contains(req, "urn:Belkin:device:**") || 
+            strings.Contains(req, "ssdp:all") || 
+            strings.Contains(req, "upnp:rootdevice")) {
+ 
+           fmt.Println("Received belkin upnp request")
+
+            // loop over devices
+            for _, device := range devices {
+                conn,err := net.Dial("udp", addr.String())
+                if err == nil {
+                    fmt.Fprintf(conn, searchResponse(host, device.Port, device.Id))
+                    conn.Close()
+                }
+            }
+        }
     }
 }
 

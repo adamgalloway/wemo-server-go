@@ -12,13 +12,21 @@ type Device struct {
     Serial string `json:"serial"`
     OnCommand string `json:"oncommand"`
     OffCommand string `json:"offcommand"`
+    Port int
+}
+
+func CheckError(err error) {
+    if err  != nil {
+        fmt.Println("Error: " , err)
+        os.Exit(0)
+    }
 }
 
 func LoadDevices(file string) map[string]Device {
-    jsonFile, err := os.Open(file)
+    jsonFile,err := os.Open(file)
     CheckError(err)
 
-    fmt.Println("Opened ",file)
+    fmt.Println("Opened",file)
     defer jsonFile.Close()
 
     byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -26,21 +34,20 @@ func LoadDevices(file string) map[string]Device {
     var result map[string]Device
     json.Unmarshal([]byte(byteValue), &result)
 
+    i := 8080
+    for key, device := range result {
+        device.Port = i
+        result[key] = device
+        i++
+    }
+
     return result
 }
 
 func main() {
-
     deviceFile := os.Args[1]
-
     devices := LoadDevices(deviceFile)
-    //fmt.Println(devices)
 
-    i := 8080
-    for key, device := range devices { 
-        go HandleHttp(i, key, device.Id, device.Serial, device.OnCommand, device.OffCommand)
-        i++
-    }
-
-    HandleUpnp("192.168.1.34", devices)
+    HandleHttp(devices)
+    HandleUpnp(devices)
 }
