@@ -88,9 +88,42 @@ func upnpHandler() http.HandlerFunc {
     }
 }
 
+func eventResponse() string {
+    var res strings.Builder
+    res.WriteString("<scpd xmlns=\"urn:Belkin:service-1-0\">")
+    res.WriteString("<actionList>")
+    res.WriteString("<action>")
+    res.WriteString("<name>SetBinaryState</name>")
+    res.WriteString("<argumentList>")
+    res.WriteString("<argument>")
+    res.WriteString("<retval/>")
+    res.WriteString("<name>BinaryState</name>")
+    res.WriteString("<relatedStateVariable>BinaryState</relatedStateVariable>")
+    res.WriteString("<direction>in</direction>")
+    res.WriteString("</argument>")
+    res.WriteString("</argumentList>")
+    res.WriteString("</action>")
+    res.WriteString("</actionList>")
+    res.WriteString("<serviceStateTable>")
+    res.WriteString("<stateVariable sendEvents=\"yes\">")
+    res.WriteString("<name>BinaryState</name>")
+    res.WriteString("<dataType>Boolean</dataType>")
+    res.WriteString("<defaultValue>0</defaultValue>")
+    res.WriteString("</stateVariable>")
+    res.WriteString("<stateVariable sendEvents=\"yes\">")
+    res.WriteString("<name>level</name>")
+    res.WriteString("<dataType>string</dataType>")
+    res.WriteString("<defaultValue>0</defaultValue>")
+    res.WriteString("</stateVariable>")
+    res.WriteString("</serviceStateTable>")
+    res.WriteString("</scpd>\r\n\r\n")
+    return res.String()
+}
 
 func eventHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "event")
+    res := eventResponse()
+    w.Header().Set("Content-Type", "text/xml")
+    fmt.Fprintf(w, res)
 }
 
 func HandleHttp(port int) {
