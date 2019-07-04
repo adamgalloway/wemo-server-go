@@ -3,11 +3,9 @@ package main
 import (
     "fmt"
     "net"
-    "net/http"
     "os"
     "strings"
     "strconv"
-    "log"
 )
 
 func SearchResponse(host string, port int, id string) string {
@@ -71,16 +69,3 @@ func HandleUpnp() {
     }
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-}
-
-func HandleHttp(port int) {
-    http.HandleFunc("/", handler)
-    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(port), nil))
-}
-
-func main() {
-    go HandleHttp(8080)
-    HandleUpnp()
-}
