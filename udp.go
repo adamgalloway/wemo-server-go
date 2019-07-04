@@ -34,7 +34,7 @@ func searchResponse(host string, port int, id string) string {
     res.WriteString("USN: uuid:")
     res.WriteString(id)
     res.WriteString("::urn:Belkin:device:**\r\n")
-    res.WriteString("X-User-Agent: redsonic\r\n\r\n")
+    //res.WriteString("X-User-Agent: redsonic\r\n\r\n")
     return res.String()
 }
  
@@ -64,13 +64,14 @@ func HandleUpnp(devices map[string]Device) {
             strings.Contains(req, "ssdp:all") || 
             strings.Contains(req, "upnp:rootdevice")) {
  
-           fmt.Println("Received belkin upnp request")
+            fmt.Println("Received belkin upnp from", addr)
 
             // loop over devices
             for _, device := range devices {
                 conn,err := net.Dial("udp", addr.String())
                 if err == nil {
-                    fmt.Fprintf(conn, searchResponse(host, device.Port, device.Id))
+                    res := searchResponse(host, device.Port, device.Id)
+                    fmt.Fprintf(conn, res)
                     conn.Close()
                 }
             }

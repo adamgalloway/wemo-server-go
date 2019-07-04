@@ -54,20 +54,31 @@ func setupResponse(name string, id string, serial string) string {
 func setupHandler(name string, id string, serial string) http.HandlerFunc {
     res := setupResponse(name, id, serial)
     return func(w http.ResponseWriter, r *http.Request) {
+        fmt.Println("setup request from", r.RemoteAddr)
+
         w.Header().Set("Content-Type", "text/xml")
         fmt.Fprintf(w, res)
     }
 }
 
-func upnpResponse(state string) string {
+func upnpResponse(state string, get bool) string {
     var res strings.Builder
+    res.WriteString("<?xml version=\"1.0\"?>")
     res.WriteString("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">")
     res.WriteString("<s:Body>")
-    res.WriteString("<u:SetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">")
+    if get {
+        res.WriteString("<u:GetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">")
+    } else {
+        res.WriteString("<u:SetBinaryStateResponse xmlns:u=\"urn:Belkin:service:basicevent:1\">")
+    }
     res.WriteString("<BinaryState>")
     res.WriteString(state)
     res.WriteString("</BinaryState>")
-    res.WriteString("</u:SetBinaryStateResponse>")
+    if get {
+        res.WriteString("</u:GetBinaryStateResponse>")
+    } else {
+        res.WriteString("</u:SetBinaryStateResponse>")
+    }
     res.WriteString("</s:Body>")
     res.WriteString("</s:Envelope>\r\n\r\n")
     return res.String()
@@ -75,10 +86,13 @@ func upnpResponse(state string) string {
 
 func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
+        fmt.Println("upnp request from", r.RemoteAddr)
+
         var state string
         var command string
         body, err := ioutil.ReadAll(r.Body)
         if err != nil {
+           fmt.Println("error reading body")
            log.Fatal(err)
         }
 
@@ -86,19 +100,28 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
 
         if strings.Contains(bodyString, "GetBinaryState") {
             // TODO return state
+            fmt.Println("state")
+            res := upnpResponse("0",true)
+            fmt.Println(res)
+            w.Header().Set("Content-Type", "text/xml")
+            fmt.Fprintf(w, res)
             return
         } else if strings.Contains(bodyString, "<BinaryState>1</BinaryState>") {
+            fmt.Println("on")
             state = "1"
             // turn on
             command = oncommand
         } else if strings.Contains(bodyString, "<BinaryState>0</BinaryState>") {
+            fmt.Println("off")
             state = "0"
             // turn off
             command = offcommand
         } else {
+            fmt.Println("uknown")
             return
         }
 
+        fmt.Println("executing command", command)
         cmd := exec.Command("sh", "-c", command)
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -108,7 +131,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
 	}
 	fmt.Println("execution result: ", out.String())
 
-        res := upnpResponse(state)
+        res := upnpResponse(state, false)
         w.Header().Set("Content-Type", "text/xml")
         fmt.Fprintf(w, res)
     }
