@@ -8,7 +8,7 @@ import (
     "log"
 )
 
-func SetupResponse(name string, id string, serial string) string {
+func setupResponse(name string, id string, serial string) string {
     var res strings.Builder
     res.WriteString("<?xml version=\"1.0\"?>")
     res.WriteString("<root xmlns=\"urn:Belkin:device-1-0\">")
@@ -48,12 +48,26 @@ func SetupResponse(name string, id string, serial string) string {
     return res.String()
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
+func setupHandler(w http.ResponseWriter, r *http.Request) {
+    res := setupResponse("testswitch", "aa993f4a-375f-4cf6-98d7-17bfc0f2290d", "000002F0101C00")
+    w.Header().Set("Content-Type", "text/xml")
+    fmt.Fprintf(w, res)
+}
+
+func upnpHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "upnp")
+}
+
+
+func eventHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "event")
 }
 
 func HandleHttp(port int) {
-    http.HandleFunc("/", handler)
-    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(port), nil))
+    server := http.NewServeMux()
+    server.HandleFunc("/setup.xml", setupHandler)
+    server.HandleFunc("/upnp/control/basicevent1", upnpHandler)
+    server.HandleFunc("/eventservice.xml", eventHandler)
+    log.Fatal(http.ListenAndServe(":" + strconv.Itoa(port), server))
 }
 
