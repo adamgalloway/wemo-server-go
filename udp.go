@@ -38,7 +38,7 @@ func CheckError(err error) {
     }
 }
  
-func HandleUpnp() {
+func HandleUpnp(host string, devices map[string]Device) {
     /* Lets prepare a address at any address at port 1900*/   
     ServerAddr,err := net.ResolveUDPAddr("udp","239.255.255.250:1900")
     CheckError(err)
@@ -54,7 +54,7 @@ func HandleUpnp() {
         n,addr,err := ServerConn.ReadFromUDP(buf)
         req := string(buf[0:n])
 
-        fmt.Println("Received ",req," from ",addr)
+        //fmt.Println("Received ",req," from ",addr)
  
         if strings.Contains(req, "M-SEARCH") && 
            (strings.Contains(req, "urn:Belkin:device:**") || 

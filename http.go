@@ -6,6 +6,8 @@ import (
     "net/http"
     "strings"
     "strconv"
+    "os/exec"
+    "bytes"
     "log"
 )
 
@@ -71,17 +73,40 @@ func upnpResponse(state string) string {
     return res.String()
 }
 
-func upnpHandler() http.HandlerFunc {
+func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         var state string
+        var command string
         body, err := ioutil.ReadAll(r.Body)
-        if err == nil && strings.Contains(string(body), "<BinaryState>1</BinaryState>") {
+        if err != nil {
+           log.Fatal(err)
+        }
+
+        bodyString := string(body)
+
+        if strings.Contains(bodyString, "GetBinaryState") {
+            return
+        } else if strings.Contains(bodyString, "<BinaryState>1</BinaryState>") {
             state = "1"
             // turn on
-        } else {
+            command = oncommand
+        } else if strings.Contains(bodyString, "<BinaryState>0</BinaryState>") {
             state = "0"
             // turn off
+            command = offcommand
+        } else {
+            return
         }
+
+        cmd := exec.Command("sh", "-c", command)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+            log.Fatal(err)
+	}
+	fmt.Printf("execution result: %q\n", out.String())
+
         res := upnpResponse(state)
         w.Header().Set("Content-Type", "text/xml")
         fmt.Fprintf(w, res)
@@ -126,10 +151,10 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, res)
 }
 
-func HandleHttp(port int) {
+func HandleHttp(port int, name string, id string, serial string, oncommand string, offcommand string) {
     server := http.NewServeMux()
-    server.HandleFunc("/setup.xml", setupHandler("testswitch", "aa993f4a-375f-4cf6-98d7-17bfc0f2290d", "000002F0101C00"))
-    server.HandleFunc("/upnp/control/basicevent1", upnpHandler())
+    server.HandleFunc("/setup.xml", setupHandler(name, id, serial))
+    server.HandleFunc("/upnp/control/basicevent1", upnpHandler(oncommand, offcommand))
     server.HandleFunc("/eventservice.xml", eventHandler)
     log.Fatal(http.ListenAndServe(":" + strconv.Itoa(port), server))
 }
