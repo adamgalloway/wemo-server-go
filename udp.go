@@ -61,6 +61,12 @@ func HandleUpnp() {
            strings.Contains(req, "ssdp:all") || 
            strings.Contains(req, "upnp:rootdevice")) {
             fmt.Println("Received belkin request")
+
+            // for loop over devices
+            conn, err := net.Dial("udp", addr.String())
+            CheckError(err)
+            fmt.Fprintf(conn, SearchResponse("192.168.1.34", 8080, "aa993f4a-375f-4cf6-98d7-17bfc0f2290d"))
+            conn.Close()
         }
 
         if err != nil {
