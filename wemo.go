@@ -49,5 +49,5 @@ func main() {
     devices := LoadDevices(deviceFile)
 
     HandleHttp(devices)
-    HandleUpnp(devices)
+    HandleUdp(devices)
 }
