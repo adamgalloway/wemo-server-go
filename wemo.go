@@ -34,7 +34,7 @@ func LoadDevices(file string) map[string]Device {
     var result map[string]Device
     json.Unmarshal([]byte(byteValue), &result)
 
-    i := 8080
+    i := 9000
     for key, device := range result {
         device.Port = i
         result[key] = device
