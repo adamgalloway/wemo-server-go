@@ -38,7 +38,7 @@ func searchResponse(host string, port int, id string) string {
     return res.String()
 }
  
-func HandleUpnp(devices map[string]Device) {
+func HandleUdp(devices map[string]Device) {
     serverAddr,err := net.ResolveUDPAddr("udp","239.255.255.250:1900")
     CheckError(err)
  
