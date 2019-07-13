@@ -137,40 +137,36 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     }
 }
 
-func eventResponse() string {
-    var res strings.Builder
-    res.WriteString("<scpd xmlns=\"urn:Belkin:service-1-0\">")
-    res.WriteString("<actionList>")
-    res.WriteString("<action>")
-    res.WriteString("<name>SetBinaryState</name>")
-    res.WriteString("<argumentList>")
-    res.WriteString("<argument>")
-    res.WriteString("<retval/>")
-    res.WriteString("<name>BinaryState</name>")
-    res.WriteString("<relatedStateVariable>BinaryState</relatedStateVariable>")
-    res.WriteString("<direction>in</direction>")
-    res.WriteString("</argument>")
-    res.WriteString("</argumentList>")
-    res.WriteString("</action>")
-    res.WriteString("</actionList>")
-    res.WriteString("<serviceStateTable>")
-    res.WriteString("<stateVariable sendEvents=\"yes\">")
-    res.WriteString("<name>BinaryState</name>")
-    res.WriteString("<dataType>Boolean</dataType>")
-    res.WriteString("<defaultValue>0</defaultValue>")
-    res.WriteString("</stateVariable>")
-    res.WriteString("<stateVariable sendEvents=\"yes\">")
-    res.WriteString("<name>level</name>")
-    res.WriteString("<dataType>string</dataType>")
-    res.WriteString("<defaultValue>0</defaultValue>")
-    res.WriteString("</stateVariable>")
-    res.WriteString("</serviceStateTable>")
-    res.WriteString("</scpd>\r\n\r\n")
-    return res.String()
-}
+eventResponse := `<?xml version="1.0"?>
+<scpd xmlns="urn:Belkin:service-1-0">
+<actionList>
+<action>
+<name>SetBinaryState</name>
+<argumentList>
+<argument><retval/>
+<name>BinaryState</name>
+<relatedStateVariable>BinaryState</relatedStateVariable>
+<direction>in</direction>
+</argument>
+</argumentList>
+</action>
+</actionList>
+<serviceStateTable>
+<stateVariable sendEvents="yes">
+<name>BinaryState</name>
+<dataType>Boolean</dataType>
+<defaultValue>0</defaultValue>
+</stateVariable>
+<stateVariable sendEvents="yes">
+<name>level</name>
+<dataType>string</dataType>
+<defaultValue>0</defaultValue>
+</stateVariable>
+</serviceStateTable>
+</scpd>\r\n`
 
 func eventHandler(w http.ResponseWriter, r *http.Request) {
-    res := eventResponse()
+    res := eventResponse
     w.Header().Set("Content-Type", "text/xml")
     fmt.Fprintf(w, res)
 }
