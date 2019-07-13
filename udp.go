@@ -2,6 +2,7 @@ package main
  
 import (
     "fmt"
+    "log"
     "net"
     "strings"
     "strconv"
@@ -16,26 +17,20 @@ func lookupHost() string {
     return localAddr[0:i]
 }
 
-func searchResponse(host string, port int, id string) string {
-    var res strings.Builder
-    res.WriteString("HTTP/1.1 200 OK\r\n")
-    res.WriteString("CACHE-CONTROL: max-age=86400\r\n")
-    res.WriteString("DATE: Sat, 26 Nov 2016 04:56:29 GMT\r\n")
-    res.WriteString("EXT:\r\n")
-    res.WriteString("LOCATION: http://")
-    res.WriteString(host)
-    res.WriteString(":")
-    res.WriteString(strconv.Itoa(port))
-    res.WriteString("/setup.xml\r\n")
-    res.WriteString("OPT: \"http://schemas.upnp.org/upnp/1/0/\"; ns=01\r\n")
-    res.WriteString("01-NLS: b9200ebb-736d-4b93-bf03-835149d13983\r\n")
-    res.WriteString("SERVER: Unspecified, UPnP/1.0, Unspecified\r\n")
-    res.WriteString("ST: urn:Belkin:device:**\r\n")
-    res.WriteString("USN: uuid:")
-    res.WriteString(id)
-    res.WriteString("::urn:Belkin:device:**\r\n")
-    //res.WriteString("X-User-Agent: redsonic\r\n\r\n")
-    return res.String()
+var searchResponse = template.New("searchResponse")
+
+func init() {
+  searchResponse.Parse(`HTTP/1.1 200 OK
+CACHE-CONTROL: max-age=86400
+DATE: Sat, 26 Nov 2016 04:56:29 GMT
+EXT:
+LOCATION: http://{{.host}}:{{.port}}/setup.xml
+OPT: "http://schemas.upnp.org/upnp/1/0/"; ns=01
+01-NLS: b9200ebb-736d-4b93-bf03-835149d13983
+SERVER: Unspecified, UPnP/1.0, Unspecified
+ST: urn:Belkin:device:**
+USN: uuid:{{.id}}::urn:Belkin:device:**
+X-User-Agent: redsonic`)
 }
  
 func HandleUdp(devices map[string]Device) {
@@ -49,12 +44,12 @@ func HandleUdp(devices map[string]Device) {
     buf := make([]byte, 1024)
 
     host := lookupHost()
-    fmt.Println(host)
+    log.Println(host)
  
     for {
         n,addr,err := serverConn.ReadFromUDP(buf)
         if err != nil {
-            fmt.Println("Error: ",err)
+            log.Println("Error reading from UDP: ",err)
         } 
 
         req := string(buf[0:n])
@@ -64,14 +59,15 @@ func HandleUdp(devices map[string]Device) {
             strings.Contains(req, "ssdp:all") || 
             strings.Contains(req, "upnp:rootdevice")) {
  
-            fmt.Println("Received belkin upnp from", addr)
+            log.Println("Received belkin upnp from", addr)
 
             // loop over devices
             for _, device := range devices {
                 conn,err := net.Dial("udp", addr.String())
                 if err == nil {
-                    res := searchResponse(host, device.Port, device.Id)
-                    fmt.Fprintf(conn, res)
+                    port :=  strconv.Itoa(device.Port)
+                    id := device.Id
+                    searchResponse.Execute(conn, map[string]string{"host": host, "port": port, "id": id})
                     conn.Close()
                 }
             }
