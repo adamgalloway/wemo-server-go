@@ -1,7 +1,7 @@
 package main
  
 import (
-    "fmt"
+    "text/template"
     "log"
     "net"
     "strings"
@@ -44,12 +44,12 @@ func HandleUdp(devices map[string]Device) {
     buf := make([]byte, 1024)
 
     host := lookupHost()
-    log.Println(host)
+    log.Println("Udp ip:", host)
  
     for {
         n,addr,err := serverConn.ReadFromUDP(buf)
         if err != nil {
-            log.Println("Error reading from UDP: ",err)
+            log.Println("Error reading from UDP:", err)
         } 
 
         req := string(buf[0:n])
@@ -59,7 +59,7 @@ func HandleUdp(devices map[string]Device) {
             strings.Contains(req, "ssdp:all") || 
             strings.Contains(req, "upnp:rootdevice")) {
  
-            log.Println("Received belkin upnp from", addr)
+            log.Println("Received belkin upnp from:", addr)
 
             // loop over devices
             for _, device := range devices {

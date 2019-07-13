@@ -2,7 +2,7 @@ package main
 
 import (
     "io/ioutil"
-    "fmt"
+    "log"
     "os"
     "encoding/json"
 )
@@ -17,8 +17,7 @@ type Device struct {
 
 func CheckError(err error) {
     if err  != nil {
-        fmt.Println("Error: " , err)
-        os.Exit(0)
+        log.Fatalln("Error: " , err)
     }
 }
 
@@ -26,7 +25,7 @@ func LoadDevices(file string) map[string]Device {
     jsonFile,err := os.Open(file)
     CheckError(err)
 
-    fmt.Println("Opened",file)
+    log.Println("Opened",file)
     defer jsonFile.Close()
 
     byteValue, _ := ioutil.ReadAll(jsonFile)
