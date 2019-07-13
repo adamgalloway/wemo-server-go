@@ -7,6 +7,7 @@ import (
     "net"
     "strings"
     "strconv"
+    "bytes"
 )
 
 func lookupHost() string {
@@ -31,7 +32,9 @@ OPT: "http://schemas.upnp.org/upnp/1/0/"; ns=01
 SERVER: Unspecified, UPnP/1.0, Unspecified
 ST: urn:Belkin:device:**
 USN: uuid:{{.id}}::urn:Belkin:device:**
-X-User-Agent: redsonic`)
+X-User-Agent: redsonic
+
+`)
 }
  
 func HandleUdp(devices map[string]Device) {
@@ -68,7 +71,9 @@ func HandleUdp(devices map[string]Device) {
                 if err == nil {
                     port :=  strconv.Itoa(device.Port)
                     id := device.Id
-                    searchResponse.Execute(conn, map[string]string{"host": host, "port": port, "id": id})
+                    var tpl bytes.Buffer
+                    searchResponse.Execute(&tpl, map[string]string{"host": host, "port": port, "id": id})
+                    fmt.Fprintf(conn, tpl.String())
                     conn.Close()
                 }
             }
