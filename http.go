@@ -137,7 +137,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     }
 }
 
-eventResponse := `<?xml version="1.0"?>
+var eventResponse string = `<?xml version="1.0"?>
 <scpd xmlns="urn:Belkin:service-1-0">
 <actionList>
   <action>
