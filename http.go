@@ -23,10 +23,10 @@ func init() {
         <BinaryState>{{.state}}</BinaryState>
       </u:{{method}}BinaryStateResponse>
     </s:Body>
-  </s:Envelope>\r\n`)
+  </s:Envelope>`)
 
   setupResponse.Parse(`<?xml version="1.0"?>
-  <root xmlns=\"urn:Belkin:device-1-0\">
+  <root xmlns="urn:Belkin:device-1-0">
   <specVersion>
     <major>1</major>
     <minor>0</minor>
@@ -53,7 +53,7 @@ func init() {
       </service>
     </serviceList>
   </device>
-  </root>\r\n`)
+  </root>`)
 }
 
 func setupHandler(name string, id string, serial string) http.HandlerFunc {
@@ -152,7 +152,7 @@ var eventResponse string = `<?xml version="1.0"?>
     <defaultValue>0</defaultValue>
   </stateVariable>
 </serviceStateTable>
-</scpd>\r\n`
+</scpd>`
 
 func eventHandler(w http.ResponseWriter, r *http.Request) {
     res := eventResponse
