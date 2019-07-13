@@ -62,21 +62,26 @@ func setupHandler(name string, id string, serial string) http.HandlerFunc {
     }
 }
 
-var upnpResponse Template = template.New("upnpResponse")
-upnpResponse.Parse(`<?xml version="1.0"?>
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-  <s:Body>
-    <u:{{method}}BinaryStateResponse xmlns:u="urn:Belkin:service:basicevent:1">
-      <BinaryState>{{state}}</BinaryState>
-    </u:{{method}}BinaryStateResponse>
-  </s:Body>
-</s:Envelope>\r\n`)
+var upnpResponse = template.New("upnpResponse")
+
+func init() {
+  upnpResponse.Parse(`<?xml version="1.0"?>
+  <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+      <u:{{method}}BinaryStateResponse xmlns:u="urn:Belkin:service:basicevent:1">
+        <BinaryState>{{state}}</BinaryState>
+      </u:{{method}}BinaryStateResponse>
+    </s:Body>
+  </s:Envelope>\r\n`)
+}
 
 func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         fmt.Println("upnp request from", r.RemoteAddr)
 
-        var command string, method string = "Get", state string = "0"
+        var command string
+        var method string = "Get"
+        var state string ="0"
 
         body, err := ioutil.ReadAll(r.Body)
         if err != nil {
