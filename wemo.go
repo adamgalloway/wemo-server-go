@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "io/ioutil"
     "log"
     "os"
@@ -12,7 +13,7 @@ type Device struct {
     Serial string `json:"serial"`
     OnCommand string `json:"oncommand"`
     OffCommand string `json:"offcommand"`
-    Port int
+    Port int `json:"port"`
 }
 
 func CheckError(err error) {
@@ -25,20 +26,13 @@ func LoadDevices(file string) map[string]Device {
     jsonFile,err := os.Open(file)
     CheckError(err)
 
-    log.Println("Opened",file)
+    fmt.Println("Opened",file)
     defer jsonFile.Close()
 
     byteValue, _ := ioutil.ReadAll(jsonFile)
 
     var result map[string]Device
     json.Unmarshal([]byte(byteValue), &result)
-
-    i := 9000
-    for key, device := range result {
-        device.Port = i
-        result[key] = device
-        i++
-    }
 
     return result
 }

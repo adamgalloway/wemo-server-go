@@ -4,14 +4,16 @@
  		"uuid" : "94de9b11-5115-46ab-88f8-dc1a7d440918",
 		"serial" : "000002F0101C00",
 		"oncommand"  : "echo hi",
-		"offcommand" : "echo bye"
+		"offcommand" : "echo bye",
+		"port" : 8080
 	},
 
 	"testswitch": { 
 		"uuid" : "81abe8d4-a481-47d2-9def-c3c581eb0ed7",
 		"serial" : "000001F0101C00",
 		"oncommand"  : "echo on",
-		"offcommand" : "echo off"
+		"offcommand" : "echo off",
+		"port" : 8081
 	}
 
 }

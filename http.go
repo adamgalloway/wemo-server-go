@@ -58,7 +58,7 @@ func init() {
 
 func setupHandler(name string, id string, serial string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        log.Println("Setup request from:", r.RemoteAddr)
+        fmt.Println("Setup request from", r.RemoteAddr)
 
         w.Header().Set("Content-Type", "text/xml")
         setupResponse.Execute(w, map[string]string{"name": name, "id": id, "serial": serial})
@@ -67,7 +67,7 @@ func setupHandler(name string, id string, serial string) http.HandlerFunc {
 
 func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        log.Println("Upnp request from:", r.RemoteAddr)
+        fmt.Println("Upnp request from", r.RemoteAddr)
 
         var command string
         var method string = "Get"
@@ -85,12 +85,12 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
             method = "Set"
 
             if strings.Contains(bodyString, "<BinaryState>1</BinaryState>") {
-                log.Println("Received upnp on")
+                fmt.Println("Received upnp on")
                 state = "1"
                 // turn on
                 command = oncommand
             } else if strings.Contains(bodyString, "<BinaryState>0</BinaryState>") {
-                log.Println("Received upnp off")
+                fmt.Println("Received upnp off")
                 state = "0"
                 // turn off
                 command = offcommand
@@ -98,7 +98,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
         }
 
         if len(command) > 0 {
-            log.Println("Executing command:", command)
+            fmt.Println("Executing command:", command)
             cmd := exec.Command("sh", "-c", command)
 	    var out bytes.Buffer
 	    cmd.Stdout = &out
@@ -106,7 +106,7 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
 	    if err != nil {
                 log.Println("Execution error:", err)
 	    } else {
-	        log.Println("Execution result:", out.String())
+	        fmt.Println("Execution result:", out.String())
             }
         }
         w.Header().Set("Content-Type", "text/xml")
@@ -161,7 +161,7 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleHttp(name string, device Device) {
-    log.Println("Starting server on", device.Port)
+    fmt.Println("Starting server on", device.Port)
     server := http.NewServeMux()
     server.HandleFunc("/setup.xml", setupHandler(name, device.Id, device.Serial))
     server.HandleFunc("/upnp/control/basicevent1", upnpHandler(device.OnCommand, device.OffCommand))
