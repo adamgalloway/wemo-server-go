@@ -97,6 +97,9 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
             }
         }
 
+        w.Header().Set("Content-Type", "text/xml")
+        upnpResponse.Execute(w, map[string]string{"method": method,"state": state})
+
         if len(command) > 0 {
             fmt.Println("Executing command:", command)
             cmd := exec.Command("sh", "-c", command)
@@ -109,8 +112,6 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
 	        fmt.Println("Execution result:", out.String())
             }
         }
-        w.Header().Set("Content-Type", "text/xml")
-        upnpResponse.Execute(w, map[string]string{"method": method,"state": state})
     }
 }
 
