@@ -28,6 +28,8 @@ jobs:
 
       - persist_to_workspace:
           root: ./bin
+          paths:
+            - wemo*
 
       - store_artifacts:
           path: /go/src/github.com/adamgalloway/wemo-server-go/bin
