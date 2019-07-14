@@ -26,6 +26,9 @@ jobs:
       - run: go test -v ./...
       - run: ./build.sh github.com/adamgalloway/wemo-server-go
 
+      - persist_to_workspace:
+          root: ./bin
+
       - store_artifacts:
           path: /go/src/github.com/adamgalloway/wemo-server-go/bin
           destination: binaries
