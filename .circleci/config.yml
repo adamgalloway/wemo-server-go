@@ -35,7 +35,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ./bin
-      - run: echo "ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_BRANCH}${CIRCLE_BUILD_NUM} ./bin/"
+      - run: ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_BRANCH}${CIRCLE_BUILD_NUM} ./bin/
 workflows:
   version: 2
   main:
