@@ -101,18 +101,22 @@ func upnpHandler(oncommand string, offcommand string) http.HandlerFunc {
         upnpResponse.Execute(w, map[string]string{"method": method,"state": state})
 
         if len(command) > 0 {
-            fmt.Println("Executing command:", command)
-            cmd := exec.Command("sh", "-c", command)
-	    var out bytes.Buffer
-	    cmd.Stdout = &out
-	    err = cmd.Run()
-	    if err != nil {
-                log.Println("Execution error:", err)
-	    } else {
-	        fmt.Println("Execution result:", out.String())
-            }
+          go runCommand(command)
         }
     }
+}
+
+func runCommand(command string) {
+  fmt.Println("Executing command:", command)
+  cmd := exec.Command("sh", "-c", command)
+  var out bytes.Buffer
+  cmd.Stdout = &out
+  err := cmd.Run()
+  if err != nil {
+    log.Println("Execution error:", err)
+  } else {
+    fmt.Println("Execution result:", out.String())
+  }
 }
 
 var eventResponse string = `<?xml version="1.0"?>
