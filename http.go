@@ -21,7 +21,7 @@ func init() {
     <s:Body>
       <u:{{.method}}BinaryStateResponse xmlns:u="urn:Belkin:service:basicevent:1">
         <BinaryState>{{.state}}</BinaryState>
-      </u:{{method}}BinaryStateResponse>
+      </u:{{.method}}BinaryStateResponse>
     </s:Body>
   </s:Envelope>`)
 
