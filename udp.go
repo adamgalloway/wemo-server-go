@@ -73,7 +73,7 @@ func HandleUDP(devices map[string]Device) {
 				conn, err := net.Dial("udp", addr.String())
 				if err == nil {
 					port := strconv.Itoa(device.Port)
-					id := device.Id
+					id := device.ID
 					var tpl bytes.Buffer
 					searchResponse.Execute(&tpl, map[string]string{"host": host, "port": port, "id": id})
 					conn.Write(tpl.Bytes())

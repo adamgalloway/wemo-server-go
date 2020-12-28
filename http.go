@@ -173,7 +173,7 @@ func handleHTTP(name string, device Device) {
 	fmt.Println("Starting server on", device.Port)
 	server := http.NewServeMux()
 	server.HandleFunc("/", logHandler)
-	server.HandleFunc("/setup.xml", setupHandler(name, device.Id, device.Serial))
+	server.HandleFunc("/setup.xml", setupHandler(name, device.ID, device.Serial))
 	server.HandleFunc("/upnp/control/basicevent1", upnpHandler(device.OnCommand, device.OffCommand))
 	server.HandleFunc("/eventservice.xml", eventHandler)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(device.Port), server))
