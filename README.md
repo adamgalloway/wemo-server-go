@@ -1,5 +1,7 @@
 # Emulated Wemo Plug
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/adamgalloway/wemo-server-go)](https://goreportcard.com/report/github.com/adamgalloway/wemo-server-go)
+
 This project provides config file based virtual plugs for use with Amazon Alexa.
 
 The devices.json specifies on/off commands to be controlled with Alexa.
