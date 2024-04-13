@@ -11,8 +11,8 @@ The devices.json specifies on/off commands to be controlled with Alexa.
 Setup init script (linux)
 
 ```
-sudo cp wemo.sh /etc/init.d/wemo
-sudo update-rc.d wemo defaults
+sudo cp wemo.service /etc/systemd/system
+sudo systemctl enable wemo.service
 ```
 
 ## Executable Usage

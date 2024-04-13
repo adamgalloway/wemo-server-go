@@ -1,0 +1,12 @@
+[Unit]
+Description=Start wemo server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=idle
+ExecStart=/home/pi/wemo-server/wemo /home/pi/wemo-server/devices.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
