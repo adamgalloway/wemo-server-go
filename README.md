@@ -20,8 +20,9 @@ sudo systemctl enable wemo.service
 Copy or build the executable (for your architecture) from [Releases](https://github.com/adamgalloway/wemo-server-go/releases) into the working directory used in the init script. Add your devices.json to the same directory or modify the init script with the path to the desired devices.json file.
 
 ```
-cp bin/wemo-linux-arm /home/pi/wemo/wemo
-cp devices.json /home/pi/wemo/
+mkdir /home/pi/wemo-server
+cp wemo-server-go-linux-arm /home/pi/wemo-server/wemo
+cp devices.json /home/pi/wemo-server/
 ```
 
 ## Device Config
